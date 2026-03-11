@@ -8,7 +8,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.requests import Request
 
-app = FastAPI(title="File Share")
+VERSION = "1.0.1"
+app = FastAPI(title="File Share", version=VERSION)
 
 # Директории
 BASE_DIR = Path(__file__).parent
@@ -55,15 +56,21 @@ async def upload_file(file: UploadFile = File(...)):
 async def download_file(file_id: str):
     """Скачивание файла по ID."""
     file_path = UPLOAD_DIR / file_id
-    
+
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="Файл не найден")
-    
+
     return FileResponse(
         path=file_path,
         filename=file_id,
         media_type="application/octet-stream"
     )
+
+
+@app.get("/version")
+async def get_version():
+    """Версия приложения."""
+    return {"version": VERSION}
 
 
 if __name__ == "__main__":
